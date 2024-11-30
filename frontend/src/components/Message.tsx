@@ -3,22 +3,49 @@
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Sparkles, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { YouTubeEmbed } from './YouTubeEmbed';
+import ReactMarkdown from 'react-markdown';
+
+interface MessageContent {
+  type: 'text' | 'video';
+  content: string;
+  videoId?: string;
+  startTime?: number;
+}
 
 interface MessageProps {
   id: string;
-  content: string;
+  content: MessageContent[];
   sender: 'user' | 'system';
 }
 
 export function Message({ id, content, sender }: MessageProps) {
   const handleLike = () => {
-    // TODO: Implement like functionality
     console.log('Liked message:', id);
   };
 
   const handleDislike = () => {
-    // TODO: Implement dislike functionality
     console.log('Disliked message:', id);
+  };
+
+  const renderContent = (item: MessageContent, index: number) => {
+    switch (item.type) {
+      case 'video':
+        return (
+          <YouTubeEmbed
+            key={`${id}-video-${index}`}
+            videoId={item.videoId!}
+            startTime={item.startTime}
+          />
+        );
+      case 'text':
+      default:
+        return (
+          <div key={`${id}-text-${index}`} className="max-w-none">
+            <ReactMarkdown>{item.content}</ReactMarkdown>
+          </div>
+        );
+    }
   };
 
   return (
@@ -44,7 +71,7 @@ export function Message({ id, content, sender }: MessageProps) {
 
         <div className="flex flex-col gap-2 w-full">
           <div className="flex flex-col gap-4">
-            {content}
+            {content.map((item, index) => renderContent(item, index))}
           </div>
           {sender === 'system' && (
             <div className="flex gap-2 items-center mt-2">

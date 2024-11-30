@@ -4,3 +4,7 @@ pydantic
 scikit-learn
 tenacity
 numpy
+openai
+google-api-python-client
+apify-client
+isodate
