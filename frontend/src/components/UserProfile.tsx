@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -23,11 +22,6 @@ import {
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { 
   Search,
-  History,
-  Settings,
-  Bookmark,
-  ThumbsUp,
-  Timer,
   Clock,
   ChevronRight,
   ArrowUpRight,
@@ -35,8 +29,6 @@ import {
 } from 'lucide-react';
 
 interface UserProfileProps {
-  isDark?: boolean;
-  setIsDark?: (isDark: boolean) => void;
 }
 
 interface MetricCardProps {
@@ -65,6 +57,54 @@ const topSearches = [
   { term: "Next.js Setup", count: 112, trend: 3 },
 ];
 
+const mockHistory = [
+  {
+    title: "Introduction to Machine Learning",
+    summary: "Learn the basics of machine learning and how to apply it in real-world scenarios.",
+    thumbnail: "https://picsum.photos/200/300",
+    date: "Yesterday",
+    duration: "10 minutes"
+  },
+  {
+    title: "Advanced JavaScript Concepts",
+    summary: "Take your JavaScript skills to the next level with this in-depth tutorial.",
+    thumbnail: "https://picsum.photos/200/301",
+    date: "2 days ago",
+    duration: "25 minutes"
+  },
+  {
+    title: "Data Science Fundamentals",
+    summary: "Get started with data science and learn the basics of data analysis and visualization.",
+    thumbnail: "https://picsum.photos/200/302",
+    date: "3 days ago",
+    duration: "30 minutes"
+  }
+];
+
+const mockSaved = [
+  {
+    title: "Introduction to Machine Learning",
+    summary: "Learn the basics of machine learning and how to apply it in real-world scenarios.",
+    thumbnail: "https://picsum.photos/200/300",
+    date: "Yesterday",
+    category: "Machine Learning"
+  },
+  {
+    title: "Advanced JavaScript Concepts",
+    summary: "Take your JavaScript skills to the next level with this in-depth tutorial.",
+    thumbnail: "https://picsum.photos/200/301",
+    date: "2 days ago",
+    category: "JavaScript"
+  },
+  {
+    title: "Data Science Fundamentals",
+    summary: "Get started with data science and learn the basics of data analysis and visualization.",
+    thumbnail: "https://picsum.photos/200/302",
+    date: "3 days ago",
+    category: "Data Science"
+  }
+];
+
 const MetricCard = ({ title, value, change, icon: Icon, description }: MetricCardProps) => {
   return (
     <Card className="flex-shrink-0 w-64 h-64">
@@ -90,16 +130,16 @@ const MetricCard = ({ title, value, change, icon: Icon, description }: MetricCar
   );
 };
 
-const UserProfile = ({ isDark = false, setIsDark = () => {} }: UserProfileProps) => {
+export const UserProfile = () => {
   const [contentType, setContentType] = React.useState('all');
   const [duration, setDuration] = React.useState('any');
   const [timeframe, setTimeframe] = React.useState('week');
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="max-w-4xl mx-auto p-6">
       <div className="flex items-center gap-4 mb-8">
         <Avatar className="h-20 w-20">
-          <AvatarImage src="/api/placeholder/80/80" alt="Profile" />
+          <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
           <AvatarFallback>JD</AvatarFallback>
         </Avatar>
         <div>
@@ -109,36 +149,91 @@ const UserProfile = ({ isDark = false, setIsDark = () => {} }: UserProfileProps)
       </div>
 
       <Tabs defaultValue="history" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="history">History</TabsTrigger>
-          <TabsTrigger value="saved">Saved</TabsTrigger>
-          <TabsTrigger value="stats">Statistics</TabsTrigger>
-          <TabsTrigger value="preferences">Preferences</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+        <TabsList className="w-full justify-start bg-gray-50 p-0 h-12">
+          <TabsTrigger 
+            value="history" 
+            className="data-[state=active]:bg-white data-[state=active]:shadow-none px-8"
+          >
+            History
+          </TabsTrigger>
+          <TabsTrigger 
+            value="saved"
+            className="data-[state=active]:bg-white data-[state=active]:shadow-none px-8"
+          >
+            Saved
+          </TabsTrigger>
+          <TabsTrigger 
+            value="stats"
+            className="data-[state=active]:bg-white data-[state=active]:shadow-none px-8"
+          >
+            Statistics
+          </TabsTrigger>
+          <TabsTrigger 
+            value="preferences"
+            className="data-[state=active]:bg-white data-[state=active]:shadow-none px-8"
+          >
+            Preferences
+          </TabsTrigger>
+          <TabsTrigger 
+            value="settings"
+            className="data-[state=active]:bg-white data-[state=active]:shadow-none px-8"
+          >
+            Settings
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="history">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Searches</CardTitle>
-              <CardDescription>Your latest video searches and summaries</CardDescription>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Search History</CardTitle>
+                  <CardDescription>Your recent video searches and summaries</CardDescription>
+                </div>
+                <Select value={timeframe} onValueChange={setTimeframe}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select timeframe" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="day">Last 24 hours</SelectItem>
+                    <SelectItem value="week">Last 7 days</SelectItem>
+                    <SelectItem value="month">Last 30 days</SelectItem>
+                    <SelectItem value="year">Last year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {[
-                  { query: "Machine Learning basics", time: "2 hours ago", duration: "15 min video" },
-                  { query: "React hooks tutorial", time: "Yesterday", duration: "25 min video" },
-                  { query: "Python data structures", time: "2 days ago", duration: "45 min video" }
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <History className="h-5 w-5 text-gray-500" />
-                      <div>
-                        <p className="font-medium">{item.query}</p>
-                        <p className="text-sm text-gray-500">{item.time} • {item.duration}</p>
+                {mockHistory.map((item, index) => (
+                  <div key={index} className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex-shrink-0">
+                      <img 
+                        src={item.thumbnail} 
+                        alt={item.title} 
+                        className="w-32 h-20 object-cover rounded-md"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {item.title}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {item.summary}
+                      </p>
+                      <div className="flex items-center mt-2 space-x-2">
+                        <span className="text-xs text-gray-400">
+                          {item.date}
+                        </span>
+                        <span className="text-xs text-gray-400">•</span>
+                        <span className="text-xs text-gray-400">
+                          {item.duration}
+                        </span>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm">View Summary</Button>
+                    <Button variant="ghost" size="sm">
+                      View Details
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -153,25 +248,33 @@ const UserProfile = ({ isDark = false, setIsDark = () => {} }: UserProfileProps)
               <CardDescription>Your bookmarked videos and summaries</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {[
-                  { title: "Advanced JavaScript Concepts", tags: ["Programming", "Web Dev"] },
-                  { title: "Data Science Fundamentals", tags: ["AI/ML", "Statistics"] }
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <Bookmark className="h-5 w-5 text-gray-500" />
-                      <div>
-                        <p className="font-medium">{item.title}</p>
-                        <div className="flex gap-2 mt-1">
-                          {item.tags.map((tag, j) => (
-                            <Badge key={j} variant="secondary">{tag}</Badge>
-                          ))}
-                        </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {mockSaved.map((item, index) => (
+                  <Card key={index} className="overflow-hidden">
+                    <div className="relative h-48">
+                      <img 
+                        src={item.thumbnail} 
+                        alt={item.title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                        <h3 className="text-white font-medium truncate">{item.title}</h3>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm">View</Button>
-                  </div>
+                    <CardContent className="p-4">
+                      <p className="text-sm text-gray-500 line-clamp-2">{item.summary}</p>
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs text-gray-400">{item.date}</span>
+                          <span className="text-xs text-gray-400">•</span>
+                          <span className="text-xs text-gray-400">{item.category}</span>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          View Details
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             </CardContent>
@@ -294,97 +397,190 @@ const UserProfile = ({ isDark = false, setIsDark = () => {} }: UserProfileProps)
           <Card>
             <CardHeader>
               <CardTitle>Content Preferences</CardTitle>
-              <CardDescription>Customize your video recommendations and summaries</CardDescription>
+              <CardDescription>Customize your video search and summary experience</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Preferred Content Type</label>
-                <Select value={contentType} onValueChange={setContentType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select content type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Content</SelectItem>
-                    <SelectItem value="tutorials">Tutorials</SelectItem>
-                    <SelectItem value="lectures">Academic Lectures</SelectItem>
-                    <SelectItem value="documentaries">Documentaries</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Preferred Video Duration</label>
-                <Select value={duration} onValueChange={setDuration}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select duration" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">Any Length</SelectItem>
-                    <SelectItem value="short">Short (&lt; 10 mins)</SelectItem>
-                    <SelectItem value="medium">Medium (10-30 mins)</SelectItem>
-                    <SelectItem value="long">Long (&gt; 30 mins)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Topics of Interest</label>
-                <Textarea 
-                  placeholder="Enter topics you're interested in (e.g., Machine Learning, Web Development, Data Science)"
-                  className="min-h-[100px]"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Summary Style</label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                    <ThumbsUp className="h-5 w-5" />
-                    <div>
-                      <p className="font-medium">Concise</p>
-                      <p className="text-sm text-gray-500">Key points only</p>
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Summary Preferences</h3>
+                <div className="grid gap-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <label className="text-sm font-medium">Summary Length</label>
+                      <p className="text-sm text-gray-500">Choose your preferred summary length</p>
                     </div>
+                    <Select defaultValue="medium">
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select length" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="short">Short (2-3 sentences)</SelectItem>
+                        <SelectItem value="medium">Medium (4-6 sentences)</SelectItem>
+                        <SelectItem value="long">Long (7-10 sentences)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                    <Timer className="h-5 w-5" />
-                    <div>
-                      <p className="font-medium">Detailed</p>
-                      <p className="text-sm text-gray-500">In-depth analysis</p>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <label className="text-sm font-medium">Language</label>
+                      <p className="text-sm text-gray-500">Select summary language</p>
                     </div>
+                    <Select defaultValue="en">
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="es">Spanish</SelectItem>
+                        <SelectItem value="fr">French</SelectItem>
+                        <SelectItem value="de">German</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
 
-              <Button className="w-full">Save Preferences</Button>
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Content Filters</h3>
+                <div className="grid gap-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <label className="text-sm font-medium">Content Categories</label>
+                      <p className="text-sm text-gray-500">Select your preferred content categories</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {["Technology", "Education", "Science", "Business"].map((category) => (
+                        <Button
+                          key={category}
+                          variant="outline"
+                          size="sm"
+                          className="rounded-full"
+                        >
+                          {category}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <label className="text-sm font-medium">Video Length</label>
+                      <p className="text-sm text-gray-500">Filter videos by duration</p>
+                    </div>
+                    <Select defaultValue="any">
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select duration" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="any">Any Length</SelectItem>
+                        <SelectItem value="short">Under 5 minutes</SelectItem>
+                        <SelectItem value="medium">5-20 minutes</SelectItem>
+                        <SelectItem value="long">Over 20 minutes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline">Reset to Default</Button>
+                <Button>Save Preferences</Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="settings">
-          <Card>
+          <Card className="shadow-md border border-gray-200 rounded-md">
             <CardHeader>
-              <CardTitle>Account Settings</CardTitle>
-              <CardDescription>Manage your account preferences</CardDescription>
+              <CardTitle className="text-2xl font-bold">Account Settings</CardTitle>
+              <CardDescription className="text-lg text-gray-600">
+                Manage your account preferences and notifications
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Email</label>
-                <Input type="email" defaultValue="john.doe@example.com" />
+            <CardContent className="space-y-8 p-6">
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold">Profile Information</h3>
+                <div className="grid gap-6">
+                  <div className="space-y-2">
+                    <label className="text-base font-medium">Display Name</label>
+                    <Input 
+                      defaultValue="John Doe" 
+                      className="max-w-md h-10 text-base"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-base font-medium">Email</label>
+                    <Input 
+                      defaultValue="john.doe@example.com" 
+                      type="email" 
+                      className="max-w-md h-10 text-base"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-base font-medium">Bio</label>
+                    <Textarea 
+                      placeholder="Tell us about yourself"
+                      className="max-w-md min-h-[100px] text-base"
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Language</label>
-                <Select defaultValue="en">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="es">Spanish</SelectItem>
-                    <SelectItem value="fr">French</SelectItem>
-                  </SelectContent>
-                </Select>
+
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold">Appearance</h3>
+                <div className="space-y-2">
+                  <label className="text-base font-medium">Theme Customization</label>
+                  <p className="text-base text-gray-600">Choose your preferred font size</p>
+                  <Select defaultValue="medium">
+                    <SelectTrigger className="max-w-md h-10">
+                      <SelectValue placeholder="Select size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">Small</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="large">Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <Button className="w-full">Update Settings</Button>
+
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold">Notifications</h3>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-base font-medium">Email Notifications</label>
+                    <p className="text-base text-gray-600">Receive updates about your saved content</p>
+                    <Select defaultValue="enabled">
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Select option" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="enabled">Enabled</SelectItem>
+                        <SelectItem value="disabled">Disabled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-base font-medium">Weekly Digest</label>
+                    <p className="text-base text-gray-600">Get a summary of your weekly activity</p>
+                    <Select defaultValue="enabled">
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Select option" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="enabled">Enabled</SelectItem>
+                        <SelectItem value="disabled">Disabled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6 space-x-2">
+                <Button variant="outline" className="min-w-[100px]">Cancel</Button>
+                <Button className="min-w-[100px]">Save Changes</Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -392,5 +588,3 @@ const UserProfile = ({ isDark = false, setIsDark = () => {} }: UserProfileProps)
     </div>
   );
 };
-
-export default UserProfile;
