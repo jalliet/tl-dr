@@ -5,11 +5,19 @@ import { Overview } from './Overview'
 import { AnimatePresence } from 'framer-motion'
 import { Message, ThinkingMessage } from './Message'
 import { SearchInput } from './SearchInput'
+import { YouTubeEmbed } from './YouTubeEmbed'
+
+interface MessageContent {
+  type: 'text' | 'youtube';
+  content: string;
+  videoId?: string;
+  startTime?: number;
+}
 
 interface Message {
-  id: string
-  content: string
-  sender: 'user' | 'system'
+  id: string;
+  content: MessageContent[];
+  sender: 'user' | 'system';
 }
 
 export function Chat() {
@@ -24,7 +32,7 @@ export function Chat() {
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: input,
+      content: [{ type: 'text', content: input }],
       sender: 'user'
     }
 
@@ -43,7 +51,7 @@ export function Chat() {
       
       const systemMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.response,
+        content: Array.isArray(data.response) ? data.response : [{ type: 'text', content: data.response }],
         sender: 'system'
       }
 
