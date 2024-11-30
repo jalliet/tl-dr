@@ -5,3 +5,6 @@ scikit-learn
 tenacity
 numpy
 openai
+google-api-python-client
+youtube-transcript-api
+isodate

@@ -6,7 +6,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from pydantic import BaseModel
-from typing import List, Dict, Optional
+from typing import List, Optional
 from enum import Enum
 
 # Load environment variables
