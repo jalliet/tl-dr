@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search } from "lucide-react"
@@ -14,6 +14,7 @@ interface SearchInputProps {
 
 export function SearchInput({ query, setQuery, isLoading, onSubmit }: SearchInputProps) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const [isRecording, setIsRecording] = useState(false)
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
@@ -22,6 +23,10 @@ export function SearchInput({ query, setQuery, isLoading, onSubmit }: SearchInpu
         onSubmit(event)
       }
     }
+  }
+
+  const toggleRecording = () => {
+    setIsRecording(!isRecording);
   }
 
   return (
@@ -45,9 +50,15 @@ export function SearchInput({ query, setQuery, isLoading, onSubmit }: SearchInpu
       />
       <Button
         type="button"
+        onClick={toggleRecording}
         className="absolute right-20 h-10 w-12 bg-gray-0 rounded-full dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 dark:border-zinc-700 flex items-center justify-center"
       >
-        <Image src="/assets/mic.png" alt="Mic" width={24} height={24} />
+        <Image 
+          src={isRecording ? "/assets/mic.png" : "/assets/stop-sqaure.png"}
+          alt={isRecording ? "Mic": "Stop"} 
+          width={24} 
+          height={24} 
+        />
       </Button>
       <Button
         type="submit"

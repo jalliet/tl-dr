@@ -1,19 +1,21 @@
 import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from app.models.profile import UserProfile
+from models.profile import UserProfile
 from openai import OpenAI
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from pydantic import BaseModel
 from typing import List, Optional
 from enum import Enum
-from app.services.youtube import YouTubeService
-from app.services.extract import setup_retrieval_system, find_relevant_sections
+from services.youtube import YouTubeService
+from services.extract import setup_retrieval_system, find_relevant_sections
+from services.speech_api import transcribe_audio, text_to_speech
 import re
+import uvicorn
 
 # Load environment variables
-load_dotenv()
+# load_dotenv()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -208,9 +210,17 @@ async def chat_endpoint(chat_request: ChatRequest):
     except Exception as e:
         logger.error(f"Error in chat endpoint: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
+    
+@app.get("/test_tts/{text}")
+async def test_tts(text: str):
+    """Test the text-to-speech functionality"""
+    try:
+        speech_file_path = text_to_speech(text)
+        return {"speech_file_path": speech_file_path}
+    except Exception as e:
+        logger.error(f"Error in test_tts endpoint: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 # Add your routes below
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
