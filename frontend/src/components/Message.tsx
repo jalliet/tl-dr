@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Sparkles, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { YouTubeEmbed } from './YouTubeEmbed';
+import ReactMarkdown from 'react-markdown';
 
 interface MessageContent {
   type: 'text' | 'youtube';
@@ -39,7 +40,11 @@ export function Message({ id, content, sender }: MessageProps) {
         );
       case 'text':
       default:
-        return <div key={`${id}-text-${index}`}>{item.content}</div>;
+        return (
+          <div key={`${id}-text-${index}`} className="max-w-none">
+            <ReactMarkdown>{item.content}</ReactMarkdown>
+          </div>
+        );
     }
   };
 

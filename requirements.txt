@@ -4,3 +4,4 @@ pydantic
 scikit-learn
 tenacity
 numpy
+openai

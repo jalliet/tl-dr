@@ -70,7 +70,7 @@ export function Chat() {
 
   return (
     <div className="py-4 h-full flex flex-col">
-      <div className="mb-4 flex-1 flex flex-col">
+      <div className="mb-4 flex-1 flex flex-col space-y-6">
         <AnimatePresence>
           {messages.length === 0 && (
             <div className="flex-1 flex items-center justify-center">
@@ -89,7 +89,7 @@ export function Chat() {
         {isLoading && <ThinkingMessage />}
       </div>
 
-      <div className="flex-1 flex flex-row justify-center">
+      <div className="w-full mx-auto max-w-3xl px-4">
         <AnimatePresence mode="wait">
           {messages.length === 0 ? (
             <SearchInput key="search" query={input} setQuery={setInput} onSubmit={handleSubmit} />

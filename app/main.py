@@ -1,7 +1,16 @@
 import logging
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from app.models.profile import UserProfile
+from openai import OpenAI
+import os
+from dotenv import load_dotenv
+from pydantic import BaseModel
+from typing import List, Dict, Optional
+from enum import Enum
+
+# Load environment variables
+load_dotenv()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -41,4 +50,60 @@ async def get_recommendations(user: UserProfile):
     ]
     return {"recommendations": recommendations}
 
+class MessageType(str, Enum):
+    text = "text"
+    video = "video"
+
+class MessageSection(BaseModel):
+    type: MessageType
+    content: str
+    videoId: Optional[str] = None
+    startTime: Optional[int] = None
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+class ChatRequest(BaseModel):
+    message: str
+    conversationHistory: List[ChatMessage] = []
+
+@app.post("/chat")
+async def chat_endpoint(chat_request: ChatRequest):
+    """Process chat messages and return responses"""
+    try:
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        
+        system_prompt = """You are a helpful AI assistant that provides clear and concise responses to user questions."""
+
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                *[{"role": msg.role, "content": msg.content} for msg in chat_request.conversationHistory],
+                {"role": "user", "content": chat_request.message}
+            ],
+            max_tokens=1500
+        )
+
+        response_text = response.choices[0].message.content
+        
+        # For now, we'll just return the response as a single text section
+        response_sections = [
+            MessageSection(
+                type=MessageType.text,
+                content=response_text
+            )
+        ]
+        
+        return {"response": response_sections}
+
+    except Exception as e:
+        logger.error(f"Error in chat endpoint: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
 # Add your routes below
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
