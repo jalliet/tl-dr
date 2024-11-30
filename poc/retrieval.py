@@ -41,8 +41,12 @@ def find_relevant_sections(model, query: str, text: str,
 
 if __name__ == "__main__":
     video_id = "kCc8FmEb1nY" 
+    # Temp, to use apify
     transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-    transcript_text = " ".join([entry['text'] for entry in transcript_list])
+    transcript_text = " ".join([
+        f"[{int(entry['start']//3600):02d}:{int((entry['start']%3600)//60):02d}:{entry['start']%60:05.2f}] {entry['text']}"
+        for entry in transcript_list
+    ])
     
     model = setup_retrieval_system()
     
@@ -66,4 +70,4 @@ if __name__ == "__main__":
         print("-" * 50)
         for i, (text, score) in enumerate(results, 1):
             print(f"\nMatch {i} (Score: {score:.4f}):")
-            print(f"Text: {text}\n")
+            print(f"{text}\n")
