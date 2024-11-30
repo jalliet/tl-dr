@@ -1,5 +1,6 @@
 'use client';
 
+import { AgentDetail } from '@/components/AgentDetail';
 import Recommendation from '@/components/Recommendation';
 
 const RecommendationPage = () => {
@@ -17,7 +18,9 @@ const RecommendationPage = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Recommended Videos</h1>
+      {/* <h1 className="text-xl font-bold mb-6">Exploration & Curation Agent</h1>  */}
+      <AgentDetail /> 
+      <h1 className="text-2xl font-bold my-6">Recommended Videos</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {videoIds.map((videoId) => (
           <Recommendation key={videoId} videoId={videoId} />
