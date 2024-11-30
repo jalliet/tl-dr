@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import type { ChatRequest, ChatResponse } from '@/types/chat'
+import type { ChatRequest, ChatResponse, MessageSection } from '@/types/chat'
 
 export async function POST(request: Request) {
   try {
@@ -23,8 +23,25 @@ export async function POST(request: Request) {
     }
 
     const data = await response.json()
+    
+    if (!Array.isArray(data.response)) {
+      throw new Error('Backend response is not in the expected format')
+    }
+
+    const validatedResponse: MessageSection[] = data.response.map((section: any) => {
+      if (!section.type || !section.content) {
+        throw new Error('Invalid message section format')
+      }
+      return {
+        type: section.type,
+        content: section.content,
+        ...(section.videoId && { videoId: section.videoId }),
+        ...(section.startTime && { startTime: section.startTime })
+      }
+    })
+
     const chatResponse: ChatResponse = {
-      response: data.response
+      response: validatedResponse
     }
     
     return NextResponse.json(chatResponse)

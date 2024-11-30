@@ -8,7 +8,7 @@ import { SearchInput } from './SearchInput'
 import { YouTubeEmbed } from './YouTubeEmbed'
 
 interface MessageContent {
-  type: 'text' | 'youtube';
+  type: 'text' | 'video';
   content: string;
   videoId?: string;
   startTime?: number;

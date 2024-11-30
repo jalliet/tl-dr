@@ -7,7 +7,7 @@ import { YouTubeEmbed } from './YouTubeEmbed';
 import ReactMarkdown from 'react-markdown';
 
 interface MessageContent {
-  type: 'text' | 'youtube';
+  type: 'text' | 'video';
   content: string;
   videoId?: string;
   startTime?: number;
@@ -30,7 +30,7 @@ export function Message({ id, content, sender }: MessageProps) {
 
   const renderContent = (item: MessageContent, index: number) => {
     switch (item.type) {
-      case 'youtube':
+      case 'video':
         return (
           <YouTubeEmbed
             key={`${id}-video-${index}`}
