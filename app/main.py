@@ -10,8 +10,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Your API",
-    description="Your API Description",
+    title="Tldr API",
+    description="Tldr API Description",
     version="1.0.0"
 )
 
@@ -41,4 +41,7 @@ async def get_recommendations(user: UserProfile):
     ]
     return {"recommendations": recommendations}
 
-# Add your routes below
+# Speech to text endpoint
+
+
+# Text to speech endpoint

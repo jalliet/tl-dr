@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search } from "lucide-react"
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 
 interface SearchInputProps {
   query: string
@@ -37,11 +38,17 @@ export function SearchInput({ query, setQuery, isLoading, onSubmit }: SearchInpu
         placeholder="Search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full h-10 pl-4 pr-14 rounded-full dark:bg-zinc-900 dark:border-zinc-700"
+        className="w-full h-10 pl-4 pr-28 rounded-full dark:bg-zinc-900 dark:border-zinc-700"
         autoFocus
         onKeyDown={handleKeyDown}
         disabled={isLoading}
       />
+      <Button
+        type="button"
+        className="absolute right-20 h-10 w-12 bg-gray-0 rounded-full dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 dark:border-zinc-700 flex items-center justify-center"
+      >
+        <Image src="/assets/mic.png" alt="Mic" width={24} height={24} />
+      </Button>
       <Button
         type="submit"
         variant="ghost"
