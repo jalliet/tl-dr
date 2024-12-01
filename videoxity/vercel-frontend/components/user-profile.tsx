@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import {
   Card,
@@ -19,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { 
   Search,
   Clock,
@@ -27,17 +28,6 @@ import {
   ArrowUpRight,
   ArrowDownRight
 } from 'lucide-react';
-
-interface UserProfileProps {
-}
-
-interface MetricCardProps {
-  title: string;
-  value: string | number;
-  change: number;
-  icon: React.ElementType;
-  description: string;
-}
 
 const searchData = [
   { date: '2024-03-01', searches: 145, completions: 120, avgTime: 25 },
@@ -105,6 +95,14 @@ const mockSaved = [
   }
 ];
 
+interface MetricCardProps {
+  title: string;
+  value: string | number;
+  change: number;
+  icon: React.ElementType;
+  description: string;
+}
+
 const MetricCard = ({ title, value, change, icon: Icon, description }: MetricCardProps) => {
   return (
     <Card className="flex-shrink-0 w-64 h-64">
@@ -130,11 +128,35 @@ const MetricCard = ({ title, value, change, icon: Icon, description }: MetricCar
   );
 };
 
+const StatsDisplay = () => {
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      {searchData.map((data, index) => (
+        <div key={index} className="p-4 bg-gray-100 rounded-lg">
+          <h3 className="text-lg font-bold">{data.date}</h3>
+          <div className="flex justify-between mt-2">
+            <span>Searches:</span>
+            <span>{data.searches}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Completions:</span>
+            <span>{data.completions}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Avg Time:</span>
+            <span>{data.avgTime}s</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export const UserProfile = () => {
   const [contentType, setContentType] = React.useState('all');
   const [duration, setDuration] = React.useState('any');
   const [timeframe, setTimeframe] = React.useState('week');
-
+  
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="flex items-center gap-4 mb-8">
@@ -318,46 +340,7 @@ export const UserProfile = () => {
               </div>
             </ScrollArea>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Search Trends</CardTitle>
-                  <CardDescription>Number of searches over time</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={searchData}>
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
-                        <Line type="monotone" dataKey="searches" stroke="#2563eb" />
-                        <Line type="monotone" dataKey="completions" stroke="#16a34a" />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Average Search Time</CardTitle>
-                  <CardDescription>Time spent searching in seconds</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={searchData}>
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="avgTime" fill="#2563eb" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <StatsDisplay />
 
             <Card>
               <CardHeader>

@@ -27,6 +27,7 @@ import { ArrowUpIcon, PaperclipIcon, StopIcon, MicIcon } from "./icons";
 import { PreviewAttachment } from "./preview-attachment";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
+import { speechToText } from "@/app/speech/route";
 
 const suggestedActions = [
   {
@@ -81,6 +82,8 @@ export function MultimodalInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
   const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunks = useRef<Array<Blob>>([]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -318,34 +321,35 @@ export function MultimodalInput({
             }
           }}
         />
-        <div className="absolute right-2 bottom-2 flex gap-2">
-        {isRecording ? (
-          <Button
-            className="rounded-full p-1.5 h-fit absolute bottom-2 right-10 m-0.5 border dark:border-zinc-600"
-            onClick={toggleRecording}
-          >
-            <SquareIcon size={14} />
-          </Button>
-        ) : (
-          <Button
-            className="rounded-full p-1.5 h-fit absolute bottom-2 right-10 m-0.5 border dark:border-zinc-600"
-            onClick={toggleRecording}
-          >
-            <MicIcon size={14} />
-          </Button>
-        )} 
-          <Button
-            className="rounded-lg p-2 h-8 dark:border-zinc-700"
-            onClick={(event) => {
-              event.preventDefault();
-              fileInputRef.current?.click();
-            }}
-            variant="outline"
-            disabled={isLoading}
-          >
-            <PaperclipIcon size={14} />
-          </Button>
-
+      </div>
+      <div className="flex justify-between items-center mt-2">
+        <Button
+          className="rounded-lg p-2 h-8 dark:border-zinc-700"
+          onClick={(event) => {
+            event.preventDefault();
+            fileInputRef.current?.click();
+          }}
+          variant="outline"
+          disabled={isLoading}
+        >
+          <PaperclipIcon size={14} />
+        </Button>
+        <div className="flex gap-2">
+          {isRecording ? (
+            <Button
+              className="rounded-full p-1.5 h-fit m-0.5 border dark:border-zinc-600"
+              onClick={toggleRecording}
+            >
+              <StopIcon size={14} />
+            </Button>
+          ) : (
+            <Button
+              className="rounded-full p-1.5 h-fit m-0.5 border dark:border-zinc-600"
+              onClick={toggleRecording}
+            >
+              <MicIcon size={14} />
+            </Button>
+          )} 
           {isLoading ? (
             <Button
               className="rounded-lg p-2 h-8 border dark:border-zinc-600"
