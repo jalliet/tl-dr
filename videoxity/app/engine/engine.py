@@ -18,6 +18,10 @@ def get_chat_engine(params=None, event_handlers=None, **kwargs):
 
     # Add query tool if index exists
     index_config = IndexConfig(callback_manager=callback_manager, **(params or {}))
+    
+    # Build our own index
+    # Fetch the youtube videos using youtube search api
+    # Embed and index and retrieve the right chunks with timestamps and urls
     index = get_index(index_config)
     if index is not None:
         query_engine_tool = get_query_engine_tool(index, **kwargs)

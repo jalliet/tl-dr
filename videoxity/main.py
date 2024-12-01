@@ -13,6 +13,7 @@ from app.middlewares.frontend import FrontendProxyMiddleware
 from app.observability import init_observability
 from app.settings import init_settings
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -43,6 +44,13 @@ mount_static_files(DATA_DIR, "/api/files/data")
 mount_static_files("output", "/api/files/output")
 
 if environment == "dev":
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     frontend_endpoint = os.getenv("FRONTEND_ENDPOINT")
     if frontend_endpoint:
         app.add_middleware(

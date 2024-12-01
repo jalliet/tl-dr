@@ -1,16 +1,20 @@
 import json
 import logging
 from typing import Awaitable, List
+import uuid
 
 from aiostream import stream
 from fastapi import BackgroundTasks, Request
 from fastapi.responses import StreamingResponse
 from llama_index.core.chat_engine.types import StreamingAgentChatResponse
 from llama_index.core.schema import NodeWithScore
+from sqlalchemy import func
 
 from app.api.routers.events import EventCallbackHandler
 from app.api.routers.models import ChatData, Message, SourceNodes
 from app.api.services.suggestion import NextQuestionSuggestion
+from app.db.database import AsyncSessionLocal
+from app.db.models import Message as DBMessage
 
 logger = logging.getLogger("uvicorn")
 
@@ -119,6 +123,21 @@ class VercelStreamResponse(StreamingResponse):
         async for token in result.async_response_gen():
             final_response += token
             yield cls.convert_text(token)
+
+        # Save the complete response in the database
+        async def save_assistant_message(content: str):
+            async with AsyncSessionLocal() as session:
+                assistant_message = DBMessage(
+                    id=str(uuid.uuid4()),
+                    chat_id=chat_data.id,
+                    role="assistant",
+                    content=content,
+                    created_at=func.now()
+                )
+                session.add(assistant_message)
+                await session.commit()
+
+        background_tasks.add_task(save_assistant_message, final_response)
 
         # Generate next questions if next question prompt is configured
         question_data = await cls._generate_next_questions(

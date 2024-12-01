@@ -1,6 +1,7 @@
 import logging
 import os
 from typing import Any, Dict, List, Optional
+from datetime import datetime
 
 from llama_index.core.llms import ChatMessage, MessageRole
 from llama_index.core.schema import NodeWithScore
@@ -104,11 +105,15 @@ class Message(BaseModel):
     role: MessageRole
     content: str
     annotations: List[Annotation] | None = None
-
+    id: Optional[str] = None
+    createdAt: Optional[datetime] = None
+    chatId: Optional[str] = None
 
 class ChatData(BaseModel):
     messages: List[Message]
     data: Any = None
+    id: str | None = None
+    userId: str | None = None
 
     class Config:
         json_schema_extra = {
