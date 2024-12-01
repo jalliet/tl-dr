@@ -22,6 +22,9 @@ export const Overview = () => {
           </svg>
           RecLLM
         </p>
+        <Link href="/user-profile" className="font-medium underline underline-offset-4">
+          Go to User Profile
+        </Link>
         {/* <p>
           This is an implementation of{' '}
           <Link
