@@ -13,3 +13,4 @@ uvicorn
 isodate
 python-multipart
 python-dotenv
+sql-alchemy
