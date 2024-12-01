@@ -6,6 +6,7 @@ import { AnimatePresence } from 'framer-motion'
 import { Message, ThinkingMessage } from './Message'
 import { SearchInput } from './SearchInput'
 import { YouTubeEmbed } from './YouTubeEmbed'
+import { speechToText } from '@/app/api/speech/route'
 
 interface MessageContent {
   type: 'text' | 'video';
@@ -25,6 +26,9 @@ export function Chat() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [isRecording, setIsRecording] = useState(false)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunks = useRef<Blob[]>([])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,6 +72,62 @@ export function Chat() {
     // Add any additional stop logic here
   }
 
+  const initRecorder = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.onstart = () => {
+        audioChunks.current = []; // Resetting chunks array
+      };
+      
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          audioChunks.current.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+        speechToText(audioBlob, setInput);
+      };
+    } catch (err) {
+      console.error('Error creating recorder:', err);
+    }
+  }
+
+  const startRecording = async () => {
+    try {
+      if (!mediaRecorderRef.current) {
+        await initRecorder();
+      }
+  
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.start();
+      }
+      setIsRecording(true);
+    } catch (err) {
+      console.error('Error accessing microphone:', err);
+    }
+  };
+
+  const stopRecording = async () => {
+    if (!mediaRecorderRef.current) {
+      return;
+    }
+    mediaRecorderRef.current.stop();
+    setIsRecording(false);
+  };
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  }
+
   return (
     <div className="py-4 h-full flex flex-col">
       <div className="mb-4 flex-1 flex flex-col space-y-6">
@@ -92,7 +152,14 @@ export function Chat() {
       <div className="w-full mx-auto max-w-3xl px-4">
         <AnimatePresence mode="wait">
           {messages.length === 0 ? (
-            <SearchInput key="search" query={input} setQuery={setInput} onSubmit={handleSubmit} />
+            <SearchInput 
+              key="search" 
+              query={input} 
+              setQuery={setInput} 
+              onSubmit={handleSubmit}
+              toggleRecording={toggleRecording}
+              isRecording={isRecording}
+            />
           ) : (
             <ChatInput
               key="chat"
@@ -101,6 +168,8 @@ export function Chat() {
               isLoading={isLoading}
               onSubmit={handleSubmit}
               onStop={handleStop}
+              toggleRecording={toggleRecording}
+              isRecording={isRecording}
             />
           )}
         </AnimatePresence>

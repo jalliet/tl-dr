@@ -3,6 +3,7 @@ from datetime import datetime
 import os 
 
 client = OpenAI()
+parent_dir = os.path.dirname(os.path.dirname(__file__))
 
 def transcribe_audio(file_path: str) -> str:
     with open(file_path, "rb") as audio_file:
@@ -15,7 +16,7 @@ def transcribe_audio(file_path: str) -> str:
 
 def text_to_speech(text: str) -> str:
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    speech_file_path = os.path.join(os.path.dirname(__file__), f"speech_output/speech_{timestamp}.mp3")
+    speech_file_path = os.path.join(parent_dir, f"speech_output/speech_{timestamp}.mp3")
     with client.audio.speech.with_streaming_response.create(
         model="tts-1",
         voice="nova",

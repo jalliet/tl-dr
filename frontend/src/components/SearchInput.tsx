@@ -4,17 +4,18 @@ import { Button } from "@/components/ui/button"
 import { Search } from "lucide-react"
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-
+ 
 interface SearchInputProps {
   query: string
   setQuery: (value: string) => void
   isLoading?: boolean
   onSubmit: (e: React.FormEvent) => Promise<void>
+  toggleRecording: () => void
+  isRecording: boolean
 }
 
-export function SearchInput({ query, setQuery, isLoading, onSubmit }: SearchInputProps) {
+export function SearchInput({ query, setQuery, isLoading, onSubmit, toggleRecording, isRecording }: SearchInputProps) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [isRecording, setIsRecording] = useState(false)
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
@@ -23,10 +24,6 @@ export function SearchInput({ query, setQuery, isLoading, onSubmit }: SearchInpu
         onSubmit(event)
       }
     }
-  }
-
-  const toggleRecording = () => {
-    setIsRecording(!isRecording);
   }
 
   return (
@@ -54,8 +51,8 @@ export function SearchInput({ query, setQuery, isLoading, onSubmit }: SearchInpu
         className="absolute right-20 h-10 w-12 bg-gray-0 rounded-full dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 dark:border-zinc-700 flex items-center justify-center"
       >
         <Image 
-          src={isRecording ? "/assets/mic.png" : "/assets/stop-sqaure.png"}
-          alt={isRecording ? "Mic": "Stop"} 
+          src={isRecording ? "/assets/stop-square.png" : "/assets/mic.png"}
+          alt={isRecording ? "Stop": "Mic"} 
           width={24} 
           height={24} 
         />

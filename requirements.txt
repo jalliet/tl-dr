@@ -11,3 +11,5 @@ sentence-transformers
 torch 
 uvicorn
 isodate
+python-multipart
+python-dotenv

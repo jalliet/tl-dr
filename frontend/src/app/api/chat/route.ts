@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { ChatRequest, ChatResponse, MessageSection } from '@/types/chat'
+import API_URL from '../config'
 
 export async function POST(request: Request) {
   try {
@@ -9,7 +10,6 @@ export async function POST(request: Request) {
       conversationHistory: body.conversationHistory || []
     }
 
-    const API_URL = 'http://localhost:8000'
     const response = await fetch(`${API_URL}/chat`, {
       method: 'POST',
       headers: {

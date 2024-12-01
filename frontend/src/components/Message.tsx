@@ -2,9 +2,10 @@
 
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Sparkles, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Sparkles, ThumbsUp, ThumbsDown, Volume2 } from 'lucide-react';
 import { YouTubeEmbed } from './YouTubeEmbed';
 import ReactMarkdown from 'react-markdown';
+import { playTTS } from '@/app/api/speech/route';
 
 interface MessageContent {
   type: 'text' | 'video';
@@ -27,6 +28,15 @@ export function Message({ id, content, sender }: MessageProps) {
   const handleDislike = () => {
     console.log('Disliked message:', id);
   };
+
+  const speak = () => {
+    const textContent = content
+      .filter(item => item.type === 'text')
+      .map(item => item.content)
+      .join(' ');
+    
+    playTTS(textContent);
+  }
 
   const renderContent = (item: MessageContent, index: number) => {
     switch (item.type) {
@@ -88,6 +98,13 @@ export function Message({ id, content, sender }: MessageProps) {
                 aria-label="Dislike message"
               >
                 <ThumbsDown className="size-4" />
+              </button>
+              <button
+                onClick={speak}
+                className="p-1 hover:bg-primary/10 rounded-md transition-colors"
+                aria-label="Speak message"
+              >
+                <Volume2 className="size-4" />
               </button>
             </div>
           )}

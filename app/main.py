@@ -1,21 +1,23 @@
 import logging
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from models.profile import UserProfile
+from fastapi.responses import FileResponse
+from app.models.profile import UserProfile
 from openai import OpenAI
 import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 from pydantic import BaseModel
 from typing import List, Optional
 from enum import Enum
-from services.youtube import YouTubeService
-from services.extract import setup_retrieval_system, find_relevant_sections
-from services.speech_api import transcribe_audio, text_to_speech
+from app.services.youtube import YouTubeService
+from app.services.extract import setup_retrieval_system, find_relevant_sections
+from app.services.speech_api import transcribe_audio, text_to_speech
 import re
 import uvicorn
 
 # Load environment variables
-# load_dotenv()
+dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
+load_dotenv(dotenv_path)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -210,13 +212,45 @@ async def chat_endpoint(chat_request: ChatRequest):
     except Exception as e:
         logger.error(f"Error in chat endpoint: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-    
-@app.get("/test_tts/{text}")
-async def test_tts(text: str):
+
+@app.post("/stt")
+async def stt_endpoint(audio_file: UploadFile = File(...)):
+    """Transcribe an audio file to text"""
+    try:
+        temp_path = None
+        # Create temporary file to store audio
+        tmp_path = os.path.join(os.path.dirname(__file__), "speech_input/temp.webm")
+        with open(tmp_path, 'wb') as temp_file:
+            # Write uploaded file content to temp file
+            content = await audio_file.read()
+            temp_file.write(content)
+            temp_path = temp_file.name
+        logger.info(f"Temp file created: {temp_path}")
+        
+        # Transcribe audio using existing function
+        transcription = transcribe_audio(temp_path)
+
+        # Clean up temp file
+        os.remove(temp_path)
+
+        return {"transcription": transcription}
+    except Exception as e:
+        logger.error(f"Error in stt endpoint: {e}")
+        # Clean up temp file if exists
+        # if temp_path:
+        #     os.remove(temp_path)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/tts/{text}")
+async def tts_endpoint(text: str):
     """Test the text-to-speech functionality"""
     try:
         speech_file_path = text_to_speech(text)
-        return {"speech_file_path": speech_file_path}
+        return FileResponse(
+            speech_file_path,
+            media_type="audio/mpeg",
+            filename=os.path.basename(speech_file_path)
+        )
     except Exception as e:
         logger.error(f"Error in test_tts endpoint: {e}")
         raise HTTPException(status_code=500, detail=str(e))
