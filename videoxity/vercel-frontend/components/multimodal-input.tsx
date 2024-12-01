@@ -23,7 +23,7 @@ import { useLocalStorage, useWindowSize } from "usehooks-ts";
 
 import { sanitizeUIMessages } from "@/lib/utils";
 
-import { ArrowUpIcon, PaperclipIcon, StopIcon } from "./icons";
+import { ArrowUpIcon, PaperclipIcon, StopIcon, MicIcon } from "./icons";
 import { PreviewAttachment } from "./preview-attachment";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
@@ -80,6 +80,7 @@ export function MultimodalInput({
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
+  const [isRecording, setIsRecording] = useState(false);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -200,6 +201,62 @@ export function MultimodalInput({
     [setAttachments]
   );
 
+  const initRecorder = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.onstart = () => {
+        audioChunks.current = []; // Resetting chunks array
+      };
+      
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          audioChunks.current.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+        speechToText(audioBlob, setInput);
+      };
+    } catch (err) {
+      console.error('Error creating recorder:', err);
+    }
+  }
+
+  const startRecording = async () => {
+    try {
+      if (!mediaRecorderRef.current) {
+        await initRecorder();
+      }
+  
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.start();
+      }
+      setIsRecording(true);
+    } catch (err) {
+      console.error('Error accessing microphone:', err);
+    }
+  };
+
+  const stopRecording = async () => {
+    if (!mediaRecorderRef.current) {
+      return;
+    }
+    mediaRecorderRef.current.stop();
+    setIsRecording(false);
+  };
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  }
+
   return (
     <div className="relative w-full flex flex-col gap-4">
       <input
@@ -262,6 +319,21 @@ export function MultimodalInput({
           }}
         />
         <div className="absolute right-2 bottom-2 flex gap-2">
+        {isRecording ? (
+          <Button
+            className="rounded-full p-1.5 h-fit absolute bottom-2 right-10 m-0.5 border dark:border-zinc-600"
+            onClick={toggleRecording}
+          >
+            <SquareIcon size={14} />
+          </Button>
+        ) : (
+          <Button
+            className="rounded-full p-1.5 h-fit absolute bottom-2 right-10 m-0.5 border dark:border-zinc-600"
+            onClick={toggleRecording}
+          >
+            <MicIcon size={14} />
+          </Button>
+        )} 
           <Button
             className="rounded-lg p-2 h-8 dark:border-zinc-700"
             onClick={(event) => {
