@@ -114,10 +114,10 @@ const MetricCard = ({ title, value, change, icon: Icon, description }: MetricCar
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col items-center justify-between h-44 text-center">
+      <CardContent className="flex flex-col items-center justify-between h-44 text-center overflow-hidden">
         <div className="flex flex-col items-center">
           <div className="text-4xl font-bold mb-4">{value}</div>
-          <p className="text-sm text-gray-500 px-4 line-clamp-2">
+          <p className="text-sm text-gray-500 px-4 line-clamp-2 overflow-hidden">
             {description}
           </p>
         </div>
@@ -149,34 +149,28 @@ export const UserProfile = () => {
       </div>
 
       <Tabs defaultValue="history" className="w-full">
-        <TabsList className="w-full justify-start bg-gray-50 p-0 h-12">
+        <TabsList className="w-full justify-center bg-gray-50 p-2 mb-4">
           <TabsTrigger 
             value="history" 
-            className="data-[state=active]:bg-white data-[state=active]:shadow-none px-8"
+            className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none px-8 mx-2"
           >
             History
           </TabsTrigger>
           <TabsTrigger 
             value="saved"
-            className="data-[state=active]:bg-white data-[state=active]:shadow-none px-8"
+            className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none px-8 mx-2"
           >
             Saved
           </TabsTrigger>
           <TabsTrigger 
             value="stats"
-            className="data-[state=active]:bg-white data-[state=active]:shadow-none px-8"
+            className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none px-8 mx-2"
           >
             Statistics
           </TabsTrigger>
           <TabsTrigger 
-            value="preferences"
-            className="data-[state=active]:bg-white data-[state=active]:shadow-none px-8"
-          >
-            Preferences
-          </TabsTrigger>
-          <TabsTrigger 
             value="settings"
-            className="data-[state=active]:bg-white data-[state=active]:shadow-none px-8"
+            className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none px-8 mx-2"
           >
             Settings
           </TabsTrigger>
@@ -298,7 +292,7 @@ export const UserProfile = () => {
               </Select>
             </div>
 
-            <ScrollArea className="w-full">
+            <ScrollArea className="w-full overflow-x-auto">
               <div className="flex gap-4 pb-4">
                 <MetricCard
                   title="Average Search Time"
@@ -393,103 +387,6 @@ export const UserProfile = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="preferences">
-          <Card>
-            <CardHeader>
-              <CardTitle>Content Preferences</CardTitle>
-              <CardDescription>Customize your video search and summary experience</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Summary Preferences</h3>
-                <div className="grid gap-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <label className="text-sm font-medium">Summary Length</label>
-                      <p className="text-sm text-gray-500">Choose your preferred summary length</p>
-                    </div>
-                    <Select defaultValue="medium">
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select length" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="short">Short (2-3 sentences)</SelectItem>
-                        <SelectItem value="medium">Medium (4-6 sentences)</SelectItem>
-                        <SelectItem value="long">Long (7-10 sentences)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <label className="text-sm font-medium">Language</label>
-                      <p className="text-sm text-gray-500">Select summary language</p>
-                    </div>
-                    <Select defaultValue="en">
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select language" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="es">Spanish</SelectItem>
-                        <SelectItem value="fr">French</SelectItem>
-                        <SelectItem value="de">German</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Content Filters</h3>
-                <div className="grid gap-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <label className="text-sm font-medium">Content Categories</label>
-                      <p className="text-sm text-gray-500">Select your preferred content categories</p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {["Technology", "Education", "Science", "Business"].map((category) => (
-                        <Button
-                          key={category}
-                          variant="outline"
-                          size="sm"
-                          className="rounded-full"
-                        >
-                          {category}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <label className="text-sm font-medium">Video Length</label>
-                      <p className="text-sm text-gray-500">Filter videos by duration</p>
-                    </div>
-                    <Select defaultValue="any">
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select duration" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="any">Any Length</SelectItem>
-                        <SelectItem value="short">Under 5 minutes</SelectItem>
-                        <SelectItem value="medium">5-20 minutes</SelectItem>
-                        <SelectItem value="long">Over 20 minutes</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline">Reset to Default</Button>
-                <Button>Save Preferences</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         <TabsContent value="settings">
           <Card className="shadow-md border border-gray-200 rounded-md">
             <CardHeader>
@@ -506,7 +403,7 @@ export const UserProfile = () => {
                     <label className="text-base font-medium">Display Name</label>
                     <Input 
                       defaultValue="John Doe" 
-                      className="max-w-md h-10 text-base"
+                      className="w-full h-10 text-base"
                     />
                   </div>
                   <div className="space-y-2">
@@ -514,14 +411,14 @@ export const UserProfile = () => {
                     <Input 
                       defaultValue="john.doe@example.com" 
                       type="email" 
-                      className="max-w-md h-10 text-base"
+                      className="w-full h-10 text-base"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-base font-medium">Bio</label>
                     <Textarea 
                       placeholder="Tell us about yourself"
-                      className="max-w-md min-h-[100px] text-base"
+                      className="w-full min-h-[100px] text-base"
                     />
                   </div>
                 </div>
