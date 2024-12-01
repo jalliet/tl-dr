@@ -119,6 +119,20 @@ export function Chat({
                   vote={votes?.find((vote) => vote.messageId === message.id)}
                 />
               ))}
+              {/* <PreviewMessage
+                key={0}
+                chatId={"1"}
+                message={{
+                  id: "05d28140-bc3f-414a-9292-da6b89a03af6",
+                  role: "assistant",
+                  content:
+                    "Hello, how can I help you today? \n\n[youtube](https://www.youtube.com/watch?v=dQw4w9WgXcQ)",
+                }}
+                block={block}
+                setBlock={setBlock}
+                isLoading={isLoading && messages.length - 1 === 0}
+                vote={undefined}
+              /> */}
             </div>
           )}
 

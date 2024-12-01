@@ -3,11 +3,44 @@ import React, { memo } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+interface YouTubeEmbedProps {
+  url: string;
+}
+
+const YouTubeEmbed = ({ url }: YouTubeEmbedProps) => {
+  const getVideoId = (url: string) => {
+    let videoId = "";
+    if (url.includes("youtube.com/embed/")) {
+      videoId = url.split("youtube.com/embed/")[1].split("?")[0];
+    } else if (url.includes("youtube.com/watch?v=")) {
+      videoId = url.split("watch?v=")[1].split("&")[0];
+    } else if (url.includes("youtu.be/")) {
+      videoId = url.split("youtu.be/")[1].split("?")[0];
+    }
+    return videoId;
+  };
+
+  const videoId = getVideoId(url);
+  if (!videoId) return null;
+
+  return (
+    <div className="video-container my-4 relative w-full pt-[56.25%]">
+      <iframe
+        className="absolute top-0 left-0 w-full h-full"
+        src={`https://www.youtube.com/embed/${videoId}`}
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+    </div>
+  );
+};
+
 const NonMemoizedMarkdown = ({ children }: { children: string }) => {
   const components: Partial<Components> = {
     // @ts-expect-error
     code: ({ node, inline, className, children, ...props }) => {
-      const match = /language-(\w+)/.exec(className || '');
+      const match = /language-(\w+)/.exec(className || "");
       return !inline && match ? (
         // @ts-expect-error
         <pre
@@ -53,13 +86,36 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
         </span>
       );
     },
-    a: ({ node, children, ...props }) => {
+    p: ({ node, children, ...props }) => {
+      // Check if the paragraph contains only a YouTube link
+      if (
+        React.Children.count(children) === 1 &&
+        React.isValidElement(children) &&
+        children.type === "a" &&
+        children.props.href &&
+        (children.props.href.includes("youtube.com") ||
+          children.props.href.includes("youtu.be"))
+      ) {
+        // Return the YouTube embed without a paragraph wrapper
+        return <YouTubeEmbed url={children.props.href} />;
+      }
+
+      // Regular paragraph
+      return <div {...props}>{children}</div>;
+    },
+    a: ({ node, children, href, ...props }) => {
+      // Check if it's a YouTube URL
+      if (href && (href.includes("youtube.com") || href.includes("youtu.be"))) {
+        return <YouTubeEmbed url={href} />;
+      }
+
+      // Regular link handling
       return (
-        // @ts-expect-error
         <Link
           className="text-blue-500 hover:underline"
           target="_blank"
           rel="noreferrer"
+          href={href || ""}
           {...props}
         >
           {children}
