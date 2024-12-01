@@ -7,6 +7,7 @@ from llama_index.core.storage import StorageContext
 from llama_index.core import VectorStoreIndex
 from llama_index.llms.openai import OpenAI
 from llama_index.postprocessor.cohere_rerank import CohereRerank
+from llama_index.core.node_parser import SentenceSplitter
 import os
 
 from app.settings import Settings
@@ -23,9 +24,19 @@ How do you know which video to generate? Each context chunk will contain metadat
 Include ONLY the videos from the chunks that have heavy visual elements (you can get a hint of this if the parsed text contains a lot of tables).
 You MUST include at least two video blocks in the output.
 
-We can follow this structure, first, give the user a quick summary of the content you've seen, then show the most relevant few videos with narration surrounding them, then towards the end, you can recommend from the search results something that might be cool from what you have found from your results.
+We can follow this structure, first, give the user a quick summary of the content you've seen, then show the most relevant few videos with narration surrounding them, then towards the end, you can recommend from the search results something that might be cool from what you have found from your results. Then add a final block for the citations (very important). Do not show the same video multiple times, if you have multiple points on the same video, just group the points together, list out the timestamps as well for the user to navigate to.
 
 You MUST output your response as a tool call in order to adhere to the required output format. Do NOT give back normal text.
+"""
+
+SYSTEM_PROMPT_2 = """
+You are a youtube qna assistant that answers a users question given a set of youtube videos.
+
+You will be given context from one or more youtube videos that take the form of parsed text.
+
+You are responsible for answering the users question based on the provided context. Please provide a detailed answer, and give citations for the sources you used to answer the question.
+
+If a user asks an irrelevant question not related to the video, say there is no information about that topic in the video, and suggest questions that might be helpful to the user and also relevant to the video.
 """
 
 from pydantic import BaseModel, Field
@@ -62,6 +73,8 @@ class YouTubeQueryEngine():
         top_k_search: int = 6,
         time_chunk_interval: int = 60,
         time_chunk_overlap: int = 30,
+        sentence_chunk_size: int = 256,
+        sentence_chunk_overlap: int = 64,
     ):
         google_api_key = os.getenv("GOOGLE_API_KEY")
         if not google_api_key:
@@ -72,10 +85,14 @@ class YouTubeQueryEngine():
         self.top_k_search = top_k_search
         self.time_chunk_interval = time_chunk_interval
         self.time_chunk_overlap = time_chunk_overlap
+        self.sentence_chunk_size = sentence_chunk_size
+        self.sentence_chunk_overlap = sentence_chunk_overlap
+        
         cohere_api_key = os.getenv("COHERE_API_KEY")    
         if not cohere_api_key:
             raise ValueError("COHERE_API_KEY is not set")
         self.reranker = CohereRerank(api_key=cohere_api_key, top_n=5)
+        self.sentence_splitter = SentenceSplitter(chunk_size=sentence_chunk_size, chunk_overlap=sentence_chunk_overlap)
 
     def search_videos(self, query: str, max_results: int = 15) -> List[str]:
         """Search YouTube videos and return video IDs."""
@@ -190,7 +207,7 @@ class YouTubeQueryEngine():
         index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)
         return index
     
-    def get_query_engine(self, search_query: str):
+    def search_youtube(self, search_query: str):
         video_ids = self.search_videos(search_query)
         
         # Get transcripts and do initial reranking of full transcripts
@@ -218,15 +235,50 @@ class YouTubeQueryEngine():
             llm=structured_llm,
         )
 
-        return query_engine
+        response = query_engine.query(search_query)
+        return response
+    
+    def talk_to_videos(self, video_ids: List[str], query: str):
+        """Ask a question to a specific youtube video."""
+        
+        # Fetch the transcript and create documents
+        documents: List[Document] = []
+        for video_id in video_ids:
+            transcript_data = self.get_transcript(video_id)
+            if transcript_data:
+                full_text = " ".join([entry['text'] for entry in transcript_data['transcript']])
+                document = Document(
+                    text=full_text,
+                    metadata={
+                        "video_id": video_id
+                    }
+                )
+                documents.append(document)
+                
+        storage_context = StorageContext.from_defaults()
+        index = VectorStoreIndex.from_documents(documents, transformations=[self.sentence_splitter], storage_context=storage_context)
+        
+        # Ask a question to the video
+        llm = OpenAI(model="gpt-4o", system_prompt=SYSTEM_PROMPT_2)
+        query_engine = index.as_query_engine(similarity_top_k=self.top_k_search, llm=llm)
+        response = query_engine.query(query)
+        return response
+    
                 
 if __name__ == "__main__":
     from dotenv import load_dotenv
     from time import time
     load_dotenv()
     engine = YouTubeQueryEngine()
+    
     start = time()
-    response = engine.process_query("What is the best way to learn python?")
+    response = engine.search_youtube("What is the best way to learn python?")
+    print(response)
+    end = time()
+    print(f"Time taken: {end - start} seconds")
+    
+    start = time()
+    response = engine.talk_to_videos(['RjHzznQy6hI', 'zSgx8U16stk', 'Cpmk_V0Is_Q'], "How do I scrape youtube?")
     print(response)
     end = time()
     print(f"Time taken: {end - start} seconds")

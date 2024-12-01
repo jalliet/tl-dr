@@ -43,6 +43,7 @@ export function Chat({
     data: streamingData,
   } = useChat({
     body: { id, modelId: selectedModelId, userId: session?.user?.id },
+    // api: `/api/chat`,
     api: `http://localhost:8000/api/chat`,
     initialMessages,
     onFinish: () => {
@@ -139,6 +140,14 @@ export function Chat({
           {isLoading &&
             messages.length > 0 &&
             messages[messages.length - 1].role === "user" && (
+              <div className="w-full max-w-3xl mx-auto px-4">
+                <ThinkingMessage />
+              </div>
+            )}
+
+          {messages.length > 0 &&
+            messages[messages.length - 1].role === "assistant" &&
+            messages[messages.length - 1].content === "" && (
               <div className="w-full max-w-3xl mx-auto px-4">
                 <ThinkingMessage />
               </div>

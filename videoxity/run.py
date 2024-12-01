@@ -13,7 +13,7 @@ import rich
 dotenv.load_dotenv()
 
 
-FRONTEND_DIR = Path(os.getenv("FRONTEND_DIR", ".frontend"))
+FRONTEND_DIR = Path(os.getenv("FRONTEND_DIR", "vercel-frontend"))
 DEFAULT_FRONTEND_PORT = 3000
 STATIC_DIR = Path(os.getenv("STATIC_DIR", "static"))
 
@@ -196,7 +196,7 @@ def _install_frontend_dependencies():
     rich.print(
         f"\n[bold]Installing frontend dependencies using {Path(package_manager).name}. It might take a while...[/bold]"
     )
-    run([package_manager, "install"], cwd=".frontend", check=True)
+    run([package_manager, "install"], cwd="vercel-frontend", check=True)
 
 
 def _get_node_package_manager() -> str:

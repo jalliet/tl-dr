@@ -1,33 +1,43 @@
-import Link from 'next/link';
-import React, { memo } from 'react';
-import ReactMarkdown, { type Components } from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import Link from "next/link";
+import React, { memo } from "react";
+import ReactMarkdown, { type Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface YouTubeEmbedProps {
   url: string;
 }
 
 const YouTubeEmbed = ({ url }: YouTubeEmbedProps) => {
-  const getVideoId = (url: string) => {
+  const getVideoIdAndTimestamp = (url: string) => {
     let videoId = "";
+    let startTime = "";
+
     if (url.includes("youtube.com/embed/")) {
       videoId = url.split("youtube.com/embed/")[1].split("?")[0];
+      const startMatch = url.match(/[?&]start=(\d+)/);
+      startTime = startMatch ? `?start=${startMatch[1]}` : "";
     } else if (url.includes("youtube.com/watch?v=")) {
       videoId = url.split("watch?v=")[1].split("&")[0];
+      // Check for both 't' and 'start' parameters
+      const timeMatch = url.match(/[?&][t|start]=(\d+)/);
+      startTime = timeMatch ? `?start=${timeMatch[1]}` : "";
     } else if (url.includes("youtu.be/")) {
       videoId = url.split("youtu.be/")[1].split("?")[0];
+      const timeMatch = url.match(/[?&]t=(\d+)/);
+      startTime = timeMatch ? `?start=${timeMatch[1]}` : "";
     }
-    return videoId;
+
+    return { videoId, startTime };
   };
 
-  const videoId = getVideoId(url);
+  const { videoId, startTime } = getVideoIdAndTimestamp(url);
   if (!videoId) return null;
 
   return (
     <div className="video-container my-4 relative w-full pt-[56.25%]">
       <iframe
         className="absolute top-0 left-0 w-full h-full"
-        src={`https://www.youtube.com/embed/${videoId}`}
+        src={`https://www.youtube.com/embed/${videoId}${startTime}`}
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
@@ -175,5 +185,5 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
 
 export const Markdown = memo(
   NonMemoizedMarkdown,
-  (prevProps, nextProps) => prevProps.children === nextProps.children,
+  (prevProps, nextProps) => prevProps.children === nextProps.children
 );

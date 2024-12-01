@@ -1,3 +1,33 @@
+## Quick Start
+
+1. Install poetry: https://python-poetry.org/docs/
+
+2. Go to /videoxity (here) and run:
+
+```
+poetry install
+poetry shell
+```
+
+3. Run the vercel frontend:
+Go to /vercel-frontend and run:
+CTRL + SHIFT + F and search for "api: `http://localhost:8000/api/chat`", this is for local host
+```
+pnpm install
+pnpm run dev
+```
+
+4. Run the fastapi app:
+Go to /videoxity (here) and run:
+```
+poetry run python main.py
+```
+
+## Deploy
+
+Probably deploy the fastapi app on a managed docker service and then point the vercel app to the fastapi app endpoint, and deploy on vercel.
+
+
 This is a [LlamaIndex](https://www.llamaindex.ai/) project using [FastAPI](https://fastapi.tiangolo.com/) bootstrapped with [`create-llama`](https://github.com/run-llama/LlamaIndexTS/tree/main/packages/create-llama).
 
 ## Getting Started
